@@ -1,0 +1,35 @@
+{
+  "name": "unbranch",
+  "version": "0.1.0",
+  "description": "Connect a repository and its coding agent to the team's agreed product model in unbranch.",
+  "keywords": [
+    "unbranch",
+    "mcp",
+    "claude-code",
+    "product",
+    "proposals"
+  ],
+  "homepage": "https://github.com/TYU-Zeng/unbranch-kit#readme",
+  "bugs": "https://github.com/TYU-Zeng/unbranch-kit/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TYU-Zeng/unbranch-kit.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "unbranch": "bin/unbranch.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}
