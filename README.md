@@ -79,6 +79,17 @@ and whether the skills are installed. Each failed check says what to run.
 Node.js 20 or later. Claude Code for the agent side and the skills; other MCP
 clients can use the same server address by hand.
 
+## Releasing
+
+Releases are cut by CI, never by hand. Commits follow
+[Conventional Commits](https://www.conventionalcommits.org); on every push to
+`main`, [release-please](https://github.com/googleapis/release-please) keeps a
+release PR open with the next version and its changelog — `feat` bumps the
+minor version and `fix` the patch while the package is below 1.0. Merging that
+PR tags the release and publishes `@unbranch/kit` to npm from
+`.github/workflows/release.yml`, through npm trusted publishing: no npm token is
+stored anywhere, and every version carries provenance back to this repository.
+
 ## License
 
 MIT

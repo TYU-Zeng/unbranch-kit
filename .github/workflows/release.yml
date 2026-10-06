@@ -1,0 +1,42 @@
+name: release
+
+# On every push to main, release-please keeps a release PR open that bumps the
+# version and writes the changelog from the Conventional Commits since the last
+# release. Merging that PR is the release: this workflow then runs again, sees
+# the release it created, and publishes to npm.
+#
+# Publishing uses npm trusted publishing (OIDC): no npm token is stored
+# anywhere. npm accepts the publish because @unbranch/kit lists this repository
+# and this workflow file as its trusted publisher, and it attaches provenance.
+# The workflow's file name is part of that trust — renaming it breaks publishing
+# until the trusted publisher on npmjs.com is updated to match.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+
+      - uses: actions/checkout@v4
+        if: ${{ steps.release.outputs.release_created }}
+      # Trusted publishing needs npm 11.5.1 or later, which Node 24 ships.
+      - uses: actions/setup-node@v4
+        if: ${{ steps.release.outputs.release_created }}
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - run: npm test
+        if: ${{ steps.release.outputs.release_created }}
+      - run: npm publish
+        if: ${{ steps.release.outputs.release_created }}
