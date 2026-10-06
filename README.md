@@ -1,7 +1,8 @@
 # unbranch
 
 Connect a repository — and the coding agent working in it — to your team's
-agreed product model in [unbranch](https://unbranch.ai).
+agreed product model in [unbranch](https://unbranch.ai), and check the work
+against it.
 
 ```bash
 npx unbranch init
@@ -9,34 +10,54 @@ npx unbranch init
 
 ## What `init` does
 
-It writes two small files at the root of your repository — found from the
-folder you run it in — both meant to be committed so the whole team shares
-them. Neither holds a password or a key.
+It looks first, then fills only what is missing. It lists what the repository
+already has — docs, a doc-sync command, skills about progress, pre-push hooks,
+other MCP servers pointing at unbranch — and never overwrites any of it.
+
+Then, at the root of your repository:
 
 | File | What it holds |
 | --- | --- |
-| `.unbranch.json` | Which unbranch project this repository builds, and the server. |
-| `.mcp.json` | unbranch as an MCP server for Claude Code. |
+| `.unbranch.json` | Which unbranch project this repository builds, the server, where your docs are (`docs`), and whether `/unbranch:progress` answers on its own (`autoProgress`). |
+| `.mcp.json` | unbranch as an MCP server for Claude Code. Other servers in it are kept. |
+| `.claude/settings.json` | The unbranch skills, if you install them — written by Claude Code's own plugin command. |
+| `CLAUDE.md` | A short note on the commands, between `<!-- unbranch -->` markers. Nothing else in the file is touched. |
 
-Other servers already in `.mcp.json`, and anything else in `.unbranch.json`,
-are kept. Running it again changes only what you ask it to.
+All of them are meant to be committed so the team shares the setup. None holds
+a password or a key: Claude Code signs in through unbranch when it first
+connects.
 
 Then, in Claude Code:
 
 1. Open Claude Code at the repository's root and allow the **unbranch** server when asked.
-2. Run `/mcp`, choose **unbranch** and sign in — your browser opens unbranch to
-   approve. Claude Code keeps and refreshes the sign-in; nothing is stored in the
-   repository.
+2. Run `/mcp`, choose **unbranch** and sign in — your browser opens unbranch to approve.
 3. If you did not give a project yet, ask Claude *"which unbranch projects can I
    reach?"*, then run `npx unbranch init --project <id>`.
 
-Your agent can now read what the team agreed — directions, capabilities and
-constraints — and draft proposals for the team to review.
+```bash
+npx unbranch init --project <id> --name "e-menu"        # bind without being asked
+npx unbranch init --server https://api-dev.unbranch.ai  # another server
+npx unbranch init --skills                              # install the skills without asking
+npx unbranch init --yes                                 # ask nothing (skills only with --skills)
+```
+
+## The skills
+
+Installed into the project with Claude Code's plugin system, from this
+repository's marketplace:
+
+| Command | What it does |
+| --- | --- |
+| `/unbranch:progress` | Where the work stands, by agreed capability — built, in progress, parked, not started, under discussion, and work no agreed capability covers — from your SNAPSHOT and BACKLOG and unbranch together. Also answers on its own when you ask what is done or what is next, unless `autoProgress` is `false`. |
+| `/unbranch:status` | What waits for you: proposals you have not answered, work being delivered. |
+| `/unbranch:link` | Links each feature document to the capability it builds — a line in its front matter, after you confirm each one — and records which part of the product this repository builds. |
+
+They read and report; they never change your code, and `progress` and `status`
+run in a read-only subagent of their own. Install them by hand with:
 
 ```bash
-npx unbranch init --project <id> --name "e-menu"   # bind without being asked
-npx unbranch init --server https://api-dev.unbranch.ai   # another server
-npx unbranch init --yes                              # ask nothing
+claude plugin marketplace add TYU-Zeng/unbranch-kit --scope project
+claude plugin install unbranch@unbranch-kit --scope project
 ```
 
 ## `doctor`
@@ -45,20 +66,15 @@ npx unbranch init --yes                              # ask nothing
 npx unbranch doctor
 ```
 
-Checks that both files are in place and agree, and that the server answers.
-Each failed check says what to run. It signs in to nothing, so whether you can
-reach your project is what Claude Code's `/mcp` shows.
+Checks the files, that the server answers, whether another MCP server would
+clash with the project's (a local `unbranch` server wins over `.mcp.json`; one
+under another name at an unbranch address gives the agent two sets of tools),
+and whether the skills are installed. Each failed check says what to run.
 
 ## Requirements
 
-Node.js 20 or later. Claude Code for the agent side; other MCP clients can use
-the same server address by hand.
-
-## What comes next
-
-This is the first piece of the unbranch developer kit: the connection. Checking
-your work against what the team agreed — progress by capability, drift, a check
-before you push — comes in later versions, as a Claude Code plugin.
+Node.js 20 or later. Claude Code for the agent side and the skills; other MCP
+clients can use the same server address by hand.
 
 ## License
 

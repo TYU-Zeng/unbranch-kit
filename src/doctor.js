@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   BINDING_FILE,
@@ -7,24 +8,28 @@ import {
   projectRoot,
   readJson,
 } from './config.js';
+import { survey } from './survey.js';
 
 /**
  * `unbranch doctor`: says whether this repository is set up, one line per
- * check, with what to do about each one that is not. It reads two files at the
- * repository's root and knocks on the server once; it signs in to nothing, so
- * it can say the server answers, not that you can reach your project — Claude
- * Code's `/mcp` says that.
+ * check, with what to do about each one that is not. It reads the files at the
+ * repository's root, the MCP servers Claude Code would load beside the
+ * project's (names and addresses only), and knocks on the server once; it signs
+ * in to nothing, so it can say the server answers, not that you can reach your
+ * project — Claude Code's `/mcp` says that.
  *
  * The server keeps no MCP session, so a plain GET is answered 405 by design:
- * any HTTP answer at all means it is up.
+ * any HTTP answer at all means it is up. A `!` line is worth knowing but not a
+ * failure: the setup works either way.
  */
-export async function doctor({ cwd, fetch, log }) {
+export async function doctor({ cwd, home, fetch, log }) {
   const root = projectRoot(cwd);
   const results = [];
   const check = (ok, text, fix) => {
     results.push(ok);
     log(`${ok ? '✓' : '✗'} ${text}${ok || !fix ? '' : `\n    → ${fix}`}`);
   };
+  const note = (text, fix) => log(`! ${text}${fix ? `\n    → ${fix}` : ''}`);
   log(`Checking ${root}`);
 
   let binding;
@@ -79,6 +84,39 @@ export async function doctor({ cwd, fetch, log }) {
     } catch (error) {
       check(false, `server does not answer at ${url} (${error.message})`, 'check your network, or the server address');
     }
+  }
+
+  // What would clash with the project's server: a local one by the same name
+  // wins over `.mcp.json`; another name at an unbranch address is a second
+  // set of tools.
+  const found = survey(root, home);
+  if (found.mcp.local && url && found.mcp.local !== url) {
+    check(
+      false,
+      `a local "${MCP_NAME}" server (${found.mcp.local}) takes precedence over ${MCP_FILE}`,
+      `remove it: claude mcp remove ${MCP_NAME} -s local`,
+    );
+  }
+  for (const other of found.mcp.others) {
+    note(
+      `"${other.name}" (${other.scope}) also points at unbranch (${other.url}) — two sets of tools`,
+      `if it is the same server: claude mcp remove ${other.name} -s ${other.scope}`,
+    );
+  }
+  note(
+    'a claude.ai connector to unbranch, if you added one, brings its own tools too — keep it on the same server, or turn one off in /mcp',
+  );
+
+  // What the kit added beside the connection.
+  if (found.pluginInstalled) check(true, 'the unbranch skills are installed for this project');
+  else note('the unbranch skills are not installed', 'npx unbranch init --skills');
+  const features = binding?.docs?.features;
+  if (typeof features === 'string') {
+    check(
+      existsSync(join(root, features)),
+      `feature documents at ${features}`,
+      `fix docs.features in ${BINDING_FILE}, or run: npx unbranch init`,
+    );
   }
 
   log(results.every(Boolean) ? `All set: ${join(root, BINDING_FILE)}` : 'Not set up yet — see above.');

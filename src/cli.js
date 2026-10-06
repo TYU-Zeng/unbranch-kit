@@ -1,4 +1,6 @@
+import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { createInterface } from 'node:readline/promises';
 import { doctor } from './doctor.js';
 import { init } from './init.js';
@@ -10,27 +12,32 @@ const { version } = JSON.parse(
 const HELP = `unbranch ${version} — connect this repository to your team's product model
 
 Usage:
-  npx unbranch init [--project <id>] [--name <name>] [--server <url>] [--yes]
+  npx unbranch init [--project <id>] [--name <name>] [--server <url>]
+                    [--skills | --no-skills] [--yes]
   npx unbranch doctor
   npx unbranch --help | --version
 
-init     Bind this repository to an unbranch project (.unbranch.json) and
-         connect Claude Code to the server (.mcp.json), at the repository's
-         root. No key is stored: Claude Code signs in through unbranch when it
-         first connects.
-doctor   Check that both files are in place and the server answers.
+init     Bind this repository to an unbranch project (.unbranch.json),
+         connect Claude Code to the server (.mcp.json) and, if you say so,
+         install the unbranch skills. It lists what the repository already
+         has first and only fills what is missing. No key is stored: Claude
+         Code signs in through unbranch when it first connects.
+doctor   Check the files, the server, and any MCP server that would clash.
 
 Options:
   --project <id>   The unbranch project this repository builds.
   --name <name>    A name to show beside the id, so a wrong binding is noticed.
   --server <url>   Another unbranch server (default https://api.unbranch.ai).
+  --skills         Install the unbranch skills for Claude Code without asking.
+  --no-skills      Do not install them, and do not ask.
   -y, --yes        Ask nothing; leave the project for later if none is given.
+                   Installs the skills only with --skills.
   -h, --help       This text.
   -v, --version    The version.
 `;
 
 const FLAGS = new Set(['project', 'name', 'server']);
-const SWITCHES = new Set(['yes', 'help', 'version']);
+const SWITCHES = new Set(['yes', 'help', 'version', 'skills', 'no-skills']);
 const SHORT = { '-h': '--help', '-v': '--version', '-y': '--yes' };
 
 /**
@@ -73,6 +80,7 @@ export function parseArgs(argv) {
 export async function main(argv, io = {}) {
   const log = io.log ?? ((line) => console.log(line));
   const cwd = io.cwd ?? process.cwd();
+  const home = 'home' in io ? io.home : homedir();
   let parsed;
   try {
     parsed = parseArgs(argv);
@@ -94,10 +102,17 @@ export async function main(argv, io = {}) {
       // Asked only when someone is there to answer and has not said not to.
       const interactive = !options.yes && (io.isTTY ?? process.stdin.isTTY);
       const prompt = interactive ? (io.prompt ?? ask) : undefined;
-      return await init({ cwd, options, prompt, log });
+      if (options.skills && options['no-skills']) {
+        throw new Error('--skills and --no-skills cannot both be given');
+      }
+      return await init({ cwd, home, options, prompt, log, run: io.run ?? run });
     }
     if (command === 'doctor') {
-      return await doctor({ cwd, fetch: io.fetch ?? fetch, log });
+      const extra = ['project', 'name', 'server', 'skills', 'no-skills', 'yes'].filter((f) => f in options);
+      if (extra.length > 0) {
+        throw new Error(`doctor takes no ${extra.map((f) => `--${f}`).join(', ')}`);
+      }
+      return await doctor({ cwd, home, fetch: io.fetch ?? fetch, log });
     }
   } catch (error) {
     log(`unbranch: ${error.message}`);
@@ -105,6 +120,19 @@ export async function main(argv, io = {}) {
   }
   log(`unbranch: unknown command "${command}"\n\n${HELP}`);
   return 2;
+}
+
+/**
+ * A command, the way a shell would find it: on Windows `claude` is a `.cmd`
+ * shim, which only a shell resolves.
+ */
+function run(command, args, { cwd }) {
+  const options = { cwd, encoding: 'utf8', timeout: 120_000 };
+  // Through a shell, one command string: an args array with `shell: true`
+  // is deprecated (DEP0190). The arguments here are fixed words, never input.
+  return process.platform === 'win32'
+    ? spawnSync([command, ...args].join(' '), { ...options, shell: true })
+    : spawnSync(command, args, options);
 }
 
 async function ask(question) {
