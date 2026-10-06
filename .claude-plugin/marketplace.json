@@ -1,0 +1,14 @@
+{
+  "name": "unbranch-kit",
+  "description": "The unbranch developer kit for Claude Code.",
+  "owner": {
+    "name": "TYU-Zeng"
+  },
+  "plugins": [
+    {
+      "name": "unbranch",
+      "source": "./",
+      "description": "Check a repository's work against what the team agreed in unbranch: progress by capability, what waits for you, and links from feature docs to the agreed model."
+    }
+  ]
+}

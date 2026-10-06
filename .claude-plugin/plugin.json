@@ -1,0 +1,12 @@
+{
+  "name": "unbranch",
+  "version": "0.2.0",
+  "description": "Check a repository's work against what the team agreed in unbranch: progress by capability, what waits for you, and links from feature docs to the agreed model.",
+  "author": {
+    "name": "TYU-Zeng"
+  },
+  "homepage": "https://github.com/TYU-Zeng/unbranch-kit#readme",
+  "repository": "https://github.com/TYU-Zeng/unbranch-kit",
+  "license": "MIT",
+  "keywords": ["unbranch", "product", "drift", "progress"]
+}
