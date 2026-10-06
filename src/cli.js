@@ -12,10 +12,10 @@ const { version } = JSON.parse(
 const HELP = `unbranch ${version} — connect this repository to your team's product model
 
 Usage:
-  npx unbranch init [--project <id>] [--name <name>] [--server <url>]
+  npx @unbranch/kit init [--project <id>] [--name <name>] [--server <url>]
                     [--skills | --no-skills] [--yes]
-  npx unbranch doctor
-  npx unbranch --help | --version
+  npx @unbranch/kit doctor
+  npx @unbranch/kit --help | --version
 
 init     Bind this repository to an unbranch project (.unbranch.json),
          connect Claude Code to the server (.mcp.json) and, if you say so,

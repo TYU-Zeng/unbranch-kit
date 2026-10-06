@@ -11,7 +11,7 @@ record and unbranch together.
 1. Read `.unbranch.json`: the project id, `scope` (the directions and
    capabilities this repository builds; absent means the whole project) and
    `docs` (where the feature documents, codebase documents, SNAPSHOT and
-   BACKLOG are). If there is no project id, say `npx unbranch init --project
+   BACKLOG are). If there is no project id, say `npx @unbranch/kit init --project
    <id>` sets it, and stop.
 2. Read `read_instructions` with `topic: "develop"`.
 3. Read the repository's half: the SNAPSHOT (what is built), the BACKLOG (what

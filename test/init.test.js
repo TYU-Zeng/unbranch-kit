@@ -48,7 +48,7 @@ test('init in an empty folder writes both files with the default server', async 
     out.includes(`Added "unbranch" in ${join(dir, '.mcp.json')} → https://api.unbranch.ai/mcp`),
     out,
   );
-  assert.match(out, /npx unbranch init --project <id>/);
+  assert.match(out, /npx @unbranch\/kit init --project <id>/);
   assert.doesNotMatch(out, /Found in/, 'an empty folder has nothing to list');
   assert.equal(existsSync(join(dir, 'CLAUDE.md')), false);
 });
@@ -189,7 +189,7 @@ test('init --yes treats a saved project of only spaces as none and drops it', as
   const { code, out } = await init(t, dir, ['--yes']);
   assert.equal(code, 0);
   assert.match(out, /no project yet/);
-  assert.match(out, /npx unbranch init --project <id>/);
+  assert.match(out, /npx @unbranch\/kit init --project <id>/);
   assert.equal('project' in read(dir, '.unbranch.json'), false);
 });
 

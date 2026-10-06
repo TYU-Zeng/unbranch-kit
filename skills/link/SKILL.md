@@ -8,9 +8,9 @@ Link each feature document to the agreed capability it builds, with the
 developer's confirmation for each one, and record the repository's scope.
 
 1. Read `.unbranch.json`: the project id and `docs.features` (where the
-   feature documents are). No project: say `npx unbranch init --project <id>`
+   feature documents are). No project: say `npx @unbranch/kit init --project <id>`
    sets it, and stop. No `docs.features`: ask where the feature documents are,
-   and stop if there are none — say `npx unbranch init` can set the docs up.
+   and stop if there are none — say `npx @unbranch/kit init` can set the docs up.
 2. Read `read_instructions` with `topic: "concepts"`, then `read_overview` and
    `read_model` for the agreed directions and capabilities.
 3. For each feature document: read it, and propose the capability it builds —

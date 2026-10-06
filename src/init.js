@@ -157,7 +157,7 @@ export async function init({ cwd, home, options, prompt, log, run }) {
   let step = 3;
   if (!project) {
     log(`  ${step}. Ask Claude "which unbranch projects can I reach?", then run`);
-    log('     npx unbranch init --project <id>');
+    log('     npx @unbranch/kit init --project <id>');
     step += 1;
   }
   if (skills) {

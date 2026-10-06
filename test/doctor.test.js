@@ -54,7 +54,7 @@ test('doctor passes every check when both files agree and the server answers 405
   // Notes are not failures.
   assert.equal(notes.length, 2);
   assert.match(notes[0], CONNECTOR);
-  assert.match(notes[1], /^! the unbranch skills are not installed\n {4}→ npx unbranch init --skills$/);
+  assert.match(notes[1], /^! the unbranch skills are not installed\n {4}→ npx @unbranch\/kit init --skills$/);
 });
 
 test('doctor counts any HTTP status as the server answering', async (t) => {
@@ -103,7 +103,7 @@ test('doctor fails with both files missing and does not knock on any server', as
   assert.equal(failed.length, 2);
   assert.match(out, /\.unbranch\.json not found/);
   assert.match(out, /\.mcp\.json has the "unbranch" server/);
-  assert.match(out, /→ run: npx unbranch init/);
+  assert.match(out, /→ run: npx @unbranch\/kit init/);
   assert.equal(lines.at(-1), NOT_SET_UP);
   assert.equal(calls.length, 0);
 });
@@ -136,7 +136,7 @@ test('doctor fails when no project is set and says how to set one', async (t) =>
   assert.equal(code, 1);
   assert.equal(failed.length, 1);
   assert.match(failed[0], /bound to a project/);
-  assert.match(out, /→ run: npx unbranch init --project <id>/);
+  assert.match(out, /→ run: npx @unbranch\/kit init --project <id>/);
 });
 
 test('doctor fails when the project is only blanks', async (t) => {
@@ -154,7 +154,7 @@ test('doctor fails when the binding names no server', async (t) => {
   assert.equal(code, 1);
   assert.equal(failed.length, 1);
   assert.match(failed[0], /\.unbranch\.json: the server must be an address/);
-  assert.match(out, /→ run: npx unbranch init --server <url>/);
+  assert.match(out, /→ run: npx @unbranch\/kit init --server <url>/);
   assert.equal(calls[0]?.url, MCP_URL, 'still checks the server .mcp.json points at');
 });
 
@@ -193,7 +193,7 @@ test('doctor fails when .mcp.json points somewhere else, and knocks on that url'
   assert.equal(code, 1);
   assert.equal(failed.length, 1);
   assert.match(failed[0], /\.mcp\.json points at https:\/\/api\.unbranch\.ai\/mcp/);
-  assert.match(out, /it points at https:\/\/api-dev\.unbranch\.ai\/mcp; run: npx unbranch init/);
+  assert.match(out, /it points at https:\/\/api-dev\.unbranch\.ai\/mcp; run: npx @unbranch\/kit init/);
   assert.equal(calls[0].url, 'https://api-dev.unbranch.ai/mcp');
 });
 
@@ -317,7 +317,7 @@ test('doctor checks that docs.features exists', async (t) => {
   const missing = await doctor(t, dir);
   assert.equal(missing.code, 1);
   assert.match(missing.failed[0], /^✗ feature documents at gone/);
-  assert.match(missing.out, /→ fix docs\.features in \.unbranch\.json, or run: npx unbranch init/);
+  assert.match(missing.out, /→ fix docs\.features in \.unbranch\.json, or run: npx @unbranch\/kit init/);
 });
 
 test('doctor says nothing about feature documents when docs.features is not set', async (t) => {

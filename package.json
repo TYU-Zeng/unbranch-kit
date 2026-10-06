@@ -1,5 +1,5 @@
 {
-  "name": "unbranch",
+  "name": "@unbranch/kit",
   "version": "0.2.0",
   "description": "Connect a repository and its coding agent to the team's agreed product model in unbranch.",
   "keywords": [
@@ -26,6 +26,9 @@
     "README.md",
     "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=20"
   },

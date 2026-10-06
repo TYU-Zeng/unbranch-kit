@@ -42,20 +42,20 @@ export async function doctor({ cwd, home, fetch, log }) {
   }
   let expected;
   if (bindingRead && binding === undefined) {
-    check(false, `${BINDING_FILE} not found`, 'run: npx unbranch init');
+    check(false, `${BINDING_FILE} not found`, 'run: npx @unbranch/kit init');
   } else if (binding) {
     try {
       expected = mcpUrl(binding.server);
       check(true, `${BINDING_FILE} names the server ${binding.server}`);
     } catch (error) {
-      check(false, `${BINDING_FILE}: ${error.message}`, 'run: npx unbranch init --server <url>');
+      check(false, `${BINDING_FILE}: ${error.message}`, 'run: npx @unbranch/kit init --server <url>');
     }
     const project =
       typeof binding.project === 'string' ? binding.project.trim() : '';
     check(
       project !== '',
       project ? `bound to project ${project}` : 'bound to a project',
-      'run: npx unbranch init --project <id>',
+      'run: npx @unbranch/kit init --project <id>',
     );
   }
 
@@ -67,12 +67,12 @@ export async function doctor({ cwd, home, fetch, log }) {
   }
   const entry = mcp?.mcpServers?.[MCP_NAME];
   const isHttp = entry?.type === 'http' && typeof entry.url === 'string';
-  check(isHttp, `${MCP_FILE} has the "${MCP_NAME}" server`, 'run: npx unbranch init');
+  check(isHttp, `${MCP_FILE} has the "${MCP_NAME}" server`, 'run: npx @unbranch/kit init');
   if (isHttp && expected) {
     check(
       entry.url === expected,
       `${MCP_FILE} points at ${expected}`,
-      `it points at ${entry.url}; run: npx unbranch init`,
+      `it points at ${entry.url}; run: npx @unbranch/kit init`,
     );
   }
 
@@ -109,13 +109,13 @@ export async function doctor({ cwd, home, fetch, log }) {
 
   // What the kit added beside the connection.
   if (found.pluginInstalled) check(true, 'the unbranch skills are installed for this project');
-  else note('the unbranch skills are not installed', 'npx unbranch init --skills');
+  else note('the unbranch skills are not installed', 'npx @unbranch/kit init --skills');
   const features = binding?.docs?.features;
   if (typeof features === 'string') {
     check(
       existsSync(join(root, features)),
       `feature documents at ${features}`,
-      `fix docs.features in ${BINDING_FILE}, or run: npx unbranch init`,
+      `fix docs.features in ${BINDING_FILE}, or run: npx @unbranch/kit init`,
     );
   }
 

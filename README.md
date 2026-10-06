@@ -5,8 +5,11 @@ agreed product model in [unbranch](https://unbranch.ai), and check the work
 against it.
 
 ```bash
-npx unbranch init
+npx @unbranch/kit init
 ```
+
+Installed globally (`npm i -g @unbranch/kit`), the command is plain
+`unbranch` — `unbranch init`, `unbranch doctor`.
 
 ## What `init` does
 
@@ -32,13 +35,13 @@ Then, in Claude Code:
 1. Open Claude Code at the repository's root and allow the **unbranch** server when asked.
 2. Run `/mcp`, choose **unbranch** and sign in — your browser opens unbranch to approve.
 3. If you did not give a project yet, ask Claude *"which unbranch projects can I
-   reach?"*, then run `npx unbranch init --project <id>`.
+   reach?"*, then run `npx @unbranch/kit init --project <id>`.
 
 ```bash
-npx unbranch init --project <id> --name "e-menu"        # bind without being asked
-npx unbranch init --server https://api-dev.unbranch.ai  # another server
-npx unbranch init --skills                              # install the skills without asking
-npx unbranch init --yes                                 # ask nothing (skills only with --skills)
+npx @unbranch/kit init --project <id> --name "e-menu"        # bind without being asked
+npx @unbranch/kit init --server https://api-dev.unbranch.ai  # another server
+npx @unbranch/kit init --skills                              # install the skills without asking
+npx @unbranch/kit init --yes                                 # ask nothing (skills only with --skills)
 ```
 
 ## The skills
@@ -63,7 +66,7 @@ claude plugin install unbranch@unbranch-kit --scope project
 ## `doctor`
 
 ```bash
-npx unbranch doctor
+npx @unbranch/kit doctor
 ```
 
 Checks the files, that the server answers, whether another MCP server would
