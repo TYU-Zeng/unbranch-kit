@@ -381,10 +381,19 @@ test(
   'survey reads core.hooksPath the way git writes it: backslashes escaped, or quoted',
   (t) => {
     // What `git config core.hooksPath 'tools\hooks'` and a quoted value write.
-    for (const value of ['tools\\\\hooks', '"tools/hooks"']) {
+    // The backslash is a separator only on Windows; elsewhere `tools\hooks` is
+    // one directory with a backslash in its name, and that is where git looks
+    // — so the hook goes where git on this platform would find it. Either way
+    // the escape has to be undone, or the path names `tools\\hooks` and misses.
+    const escaped =
+      process.platform === 'win32' ? 'tools/hooks/pre-push' : 'tools\\hooks/pre-push';
+    for (const [value, hook] of [
+      ['tools\\\\hooks', escaped],
+      ['"tools/hooks"', 'tools/hooks/pre-push'],
+    ]) {
       const root = tempDir(t);
       write(root, '.git/config', `[core]\n\thooksPath = ${value}\n`);
-      write(root, 'tools/hooks/pre-push', '#!/bin/sh');
+      write(root, hook, '#!/bin/sh');
       assert.deepEqual(survey(root, tempDir(t)).prePush, ['tools/hooks/pre-push'], value);
     }
   },
