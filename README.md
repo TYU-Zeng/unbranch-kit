@@ -53,6 +53,7 @@ repository's marketplace:
 | --- | --- |
 | `/unbranch:progress` | Where the work stands, by agreed capability — built, in progress, parked, not started, under discussion, and work no agreed capability covers — from your SNAPSHOT and BACKLOG and unbranch together. Also answers on its own when you ask what is done or what is next, unless `autoProgress` is `false`. |
 | `/unbranch:status` | What waits for you: proposals you have not answered, work being delivered. |
+| `/unbranch:import` | Brings the product into an empty project as its first picture: reads this repository, the files around it and every other tool connected to your session — a wiki, a document store, an issue tracker — shows you the outline, and leaves a draft for you to send for review on the web. |
 | `/unbranch:link` | Links each feature document to the capability it builds — a line in its front matter, after you confirm each one — and records which part of the product this repository builds. |
 
 They read and report; they never change your code, and `progress` and `status`
