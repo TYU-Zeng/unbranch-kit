@@ -1,6 +1,6 @@
 ---
 name: import
-description: Bring the product this repository builds into an empty unbranch project as its first picture — drafted from the code, its docs, the files around it and every other tool connected to this session, and left as a draft for the developer to send for review on the web. Use when the developer asks to import or bring the product into unbranch, or runs /unbranch:import.
+description: Bring the product this repository builds into an empty unbranch project as its first picture — drafted from the code, its docs, the files around it and the other tools connected to this session that the developer points it to, and left as a draft for the developer to send for review on the web. Use when the developer asks to import or bring the product into unbranch, or runs /unbranch:import.
 ---
 
 Draft the first picture of the product from everything this session can
@@ -20,8 +20,8 @@ reach, with the developer's confirmation, and leave it as a draft.
      what is built; the docs say why, and for whom;
    - other repositories of the same product, when the developer points you to
      them;
-   - every other tool connected to this session — a wiki, a document store, an
-     issue tracker, a design tool: search each for the product by name.
+   - the session's other tools — a wiki, a document store, an issue tracker —
+     as the guide says: ask before reading any of them.
    Then summarise in a few lines what you read, and ask once what else exists:
    another repository, a space you could not reach, a document only someone
    on the team has.
