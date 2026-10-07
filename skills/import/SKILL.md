@@ -11,30 +11,21 @@ reach, with the developer's confirmation, and leave it as a draft.
 2. `read_overview` for the project. If it already has directions, or a
    proposal in review, there is nothing to import: say so — a change goes in
    as a proposal (`read_instructions` topic `draft`) — and stop.
-3. Read `read_instructions` with `topic: "import"` and follow it: it holds the
-   method and the concepts. What follows is what a repository adds to it.
-4. Gather, and say what you are reading as you go:
-   - this repository: the README, `docs/` (feature documents, SNAPSHOT for
-     what is built, BACKLOG for what is not), release notes or a changelog,
-     and the screens, routes, commands or API the code exposes. The code says
-     what is built; the docs say why, and for whom;
+3. Read `read_instructions` with `topic: "import"` and follow it: the method —
+   what to gather, what counts as built, the outline the developer agrees to
+   before anything is written — and the concepts are there. This skill adds
+   only where a repository's material is.
+4. In a repository, say what you are reading as you go:
+   - the README, `docs/` (feature documents, SNAPSHOT for what is built,
+     BACKLOG for what is not), release notes or a changelog;
+   - the screens, routes, commands or API the code exposes: the code says what
+     is built, the docs say why, and for whom. Where they disagree, ask;
    - other repositories of the same product, when the developer points you to
-     them;
-   - the session's other tools — a wiki, a document store, an issue tracker —
-     as the guide says: ask before reading any of them.
-   Then summarise in a few lines what you read, and ask once what else exists:
-   another repository, a space you could not reach, a document only someone
-   on the team has.
-5. Keep only what someone can use today. The backlog, open tickets, features
-   behind a flag that is off, routes with no screen and TODOs stay out. Where
-   the code and the docs disagree, ask.
-6. Before writing, show the outline: each direction with its capabilities,
-   the constraints, and what you left out and why. Wait for the developer's
-   yes.
-7. Write it with `write_draft` as one baseline and give its link. Do not send
-   it: say they read it and send it for review on the web, where the team
-   agrees to it.
-8. Once the team has agreed to it, `/unbranch:link` links the feature
+     them.
+5. Toward unbranch, only read the project and write the draft with
+   `write_draft`. Never send it: the developer reads it and sends it for
+   review on the web, where the team agrees to it.
+6. Once the team has agreed to it, `/unbranch:link` links the feature
    documents to its capabilities — say so if `docs.features` is set.
 
 End with a line saying how many directions, capabilities and constraints
