@@ -14,18 +14,37 @@ reach, with the developer's confirmation, and leave it as a draft.
 3. Read `read_instructions` with `topic: "import"` and follow it: the method —
    what to gather, what counts as built, the outline the developer agrees to
    before anything is written — and the concepts are there. This skill adds
-   only where a repository's material is.
-4. In a repository, say what you are reading as you go:
+   where a repository's material is, and asks two of the guide's questions
+   in a set way.
+4. Read this repository, and say what you are reading as you go:
    - the README, `docs/` (feature documents, SNAPSHOT for what is built,
      BACKLOG for what is not), release notes or a changelog;
    - the screens, routes, commands or API the code exposes: the code says what
-     is built, the docs say why, and for whom. Where they disagree, ask;
-   - other repositories of the same product, when the developer points you to
-     them.
-5. Toward unbranch, only read the project and write the draft with
+     is built, the docs say why, and for whom. Where they disagree, ask.
+5. **Ask whether the product is in other repositories too**, in your first
+   reply. Do not list or search the folders around this one to find out: a
+   product's other repositories may sit beside it or anywhere else, and only
+   the developer knows which are its. Ask it as a choice:
+   - **Only this repository** — the whole product is here.
+   - **Several repositories** — and where the others are: a path, or a link.
+   - **Other** — in their words.
+
+   Use the AskUserQuestion tool when the session has it (it adds Other
+   itself); otherwise give the options as a numbered list in your reply.
+   Then read the repositories the developer names, as you read this one, and
+   no others.
+6. **Ask how the product splits before any outline**, once you have read
+   what you were pointed to. Repositories split a product by how it is built
+   — an app, its back office, a server — which is not necessarily how the
+   team thinks of it. Say the split you see, and ask it as a choice too: the
+   parts as separate directions, all as one direction, or other — each option
+   with what it would hold. A repository that only serves the others, such as
+   a backend, is not a direction of its own. Show no outline until this is
+   answered; then show it as the import guide says, and wait for a yes.
+7. Toward unbranch, only read the project and write the draft with
    `write_draft`. Never send it: the developer reads it and sends it for
    review on the web, where the team agrees to it.
-6. Once the team has agreed to it, `/unbranch:link` links the feature
+8. Once the team has agreed to it, `/unbranch:link` links the feature
    documents to its capabilities — say so if `docs.features` is set.
 
 End with a line saying how many directions, capabilities and constraints
