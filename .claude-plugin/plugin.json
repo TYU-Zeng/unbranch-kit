@@ -1,6 +1,6 @@
 {
   "name": "unbranch",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Check a repository's work against what the team agreed in unbranch: progress by capability, what waits for you, links from feature docs to the agreed model, and a first import of the product.",
   "author": {
     "name": "TYU-Zeng"
