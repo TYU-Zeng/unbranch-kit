@@ -8,7 +8,7 @@
     {
       "name": "unbranch",
       "source": "./",
-      "description": "Check a repository's work against what the team agreed in unbranch: progress by capability, what waits for you, and links from feature docs to the agreed model."
+      "description": "Check a repository's work against what the team agreed in unbranch: progress by capability, what waits for you, links from feature docs to the agreed model, and a first import of the product."
     }
   ]
 }

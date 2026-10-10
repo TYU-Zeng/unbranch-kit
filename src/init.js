@@ -110,7 +110,7 @@ export async function init({ cwd, home, options, prompt, log, run }) {
   else if (found.pluginInstalled || !prompt) wantSkills = false;
   else
     wantSkills = await yesNo(
-      'Install the unbranch skills for Claude Code (/unbranch:progress, /unbranch:status, /unbranch:link)?',
+      'Install the unbranch skills for Claude Code (/unbranch:progress, /unbranch:status, /unbranch:link, /unbranch:import)?',
       true,
     );
 
@@ -163,6 +163,7 @@ export async function init({ cwd, home, options, prompt, log, run }) {
   if (skills) {
     log(`  ${step}. Run /unbranch:status, or ask "where does the work stand?"`);
     if (docs.features) log(`     /unbranch:link links ${docs.features} to the agreed capabilities.`);
+    log('     /unbranch:import brings the product in, if the project is still empty.');
   }
   log(`Commit ${BINDING_FILE}, ${MCP_FILE}${skills ? ' and .claude/settings.json' : ''} so your team shares the setup.`);
   return failed ? 1 : 0;
@@ -256,7 +257,8 @@ function writeClaudeBlock(root, project, name, log) {
     BLOCK_START,
     `This repository builds the unbranch project ${label}; the binding is \`.unbranch.json\`.`,
     'In Claude Code, `/unbranch:progress` says where the work stands against what the team agreed,',
-    '`/unbranch:status` what waits for you, and `/unbranch:link` links feature docs to agreed capabilities.',
+    '`/unbranch:status` what waits for you, `/unbranch:link` links feature docs to agreed capabilities,',
+    'and `/unbranch:import` brings the product into an empty project.',
     BLOCK_END,
   ].join('\n');
   const current = existsSync(path) ? readFileSync(path, 'utf8') : '';

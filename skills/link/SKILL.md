@@ -32,9 +32,9 @@ developer's confirmation for each one, and record the repository's scope.
    Say so, and that it is work the team has not agreed — the developer can
    propose it from here if they want (the `draft` guide in
    `read_instructions`), or leave it.
-7. If the project has nothing agreed yet, say so: its first picture can be
-   drafted from these documents (`read_instructions` topic `import`) and left
-   for the developer to send on the web.
+7. If the project has nothing agreed yet, say so, and that `/unbranch:import`
+   drafts its first picture from this repository and everything else this
+   session can reach, for the developer to send on the web.
 
 End with a line saying how many documents were linked, skipped and left
 unlinked.
