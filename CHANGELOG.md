@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.1](https://github.com/TYU-Zeng/unbranch-kit/compare/v0.3.0...v0.3.1) (2026-10-10)
+
+
+### Features
+
+* keep the unbranch skills up to date ([1943dac](https://github.com/TYU-Zeng/unbranch-kit/commit/1943dacbef839125129333f62accbfb9885edb22))
+* say in doctor when the unbranch skills fall behind ([be2e257](https://github.com/TYU-Zeng/unbranch-kit/commit/be2e257c5dbbd605e81e9d437c6f82b22296a2be))
+* turn on auto-update for the unbranch skills when init installs them ([e8a3127](https://github.com/TYU-Zeng/unbranch-kit/commit/e8a3127d9e9dfcf83214991eb3c2e37b70fc1f31))
+
 ## [0.3.0](https://github.com/TYU-Zeng/unbranch-kit/compare/v0.2.1...v0.3.0) (2026-10-10)
 
 
