@@ -1,15 +1,11 @@
 import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { createInterface } from 'node:readline/promises';
+import { VERSION } from './config.js';
 import { doctor } from './doctor.js';
 import { init } from './init.js';
 
-const { version } = JSON.parse(
-  readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
-);
-
-const HELP = `unbranch ${version} — connect this repository to your team's product model
+const HELP = `unbranch ${VERSION} — connect this repository to your team's product model
 
 Usage:
   npx @unbranch/kit init [--project <id>] [--name <name>] [--server <url>]
@@ -90,7 +86,7 @@ export async function main(argv, io = {}) {
   }
   const { command, options } = parsed;
   if (options.version) {
-    log(version);
+    log(VERSION);
     return 0;
   }
   if (options.help || !command) {

@@ -1,6 +1,14 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
+/**
+ * The kit's version, which is also its Claude Code plugin's: release-please
+ * bumps `package.json` and `.claude-plugin/plugin.json` together.
+ */
+export const { version: VERSION } = JSON.parse(
+  readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
+);
+
 /** Where unbranch is served; `--server` points a repository elsewhere (dev). */
 export const DEFAULT_SERVER = 'https://api.unbranch.ai';
 
