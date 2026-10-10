@@ -23,7 +23,7 @@ Then, at the root of your repository:
 | --- | --- |
 | `.unbranch.json` | Which unbranch project this repository builds, the server, where your docs are (`docs`), and whether `/unbranch:progress` answers on its own (`autoProgress`). |
 | `.mcp.json` | unbranch as an MCP server for Claude Code. Other servers in it are kept. |
-| `.claude/settings.json` | The unbranch skills, if you install them — written by Claude Code's own plugin command. |
+| `.claude/settings.json` | The unbranch skills, if you install them — written by Claude Code's own plugin command, with auto-update turned on so each release reaches everyone. |
 | `CLAUDE.md` | A short note on the commands, between `<!-- unbranch -->` markers. Nothing else in the file is touched. |
 
 All of them are meant to be committed so the team shares the setup. None holds
@@ -64,6 +64,11 @@ claude plugin marketplace add TYU-Zeng/unbranch-kit --scope project
 claude plugin install unbranch@unbranch-kit --scope project
 ```
 
+Claude Code leaves auto-update off for a marketplace like this one, so `init`
+sets `"autoUpdate": true` on it in `.claude/settings.json`, unless it is
+already set either way. Without it, a release reaches you only through
+`claude plugin update unbranch@unbranch-kit`.
+
 ## `doctor`
 
 ```bash
@@ -73,7 +78,9 @@ npx @unbranch/kit doctor
 Checks the files, that the server answers, whether another MCP server would
 clash with the project's (a local `unbranch` server wins over `.mcp.json`; one
 under another name at an unbranch address gives the agent two sets of tools),
-and whether the skills are installed. Each failed check says what to run.
+whether the skills are installed, whether they update on their own, and
+whether the copy Claude Code loads here is older than the kit. Each failed
+check says what to run.
 
 ## Requirements
 

@@ -20,6 +20,8 @@ export function survey(root, home) {
     claudeMd: claudeMd(root),
     mcp: mcpServers(root, home),
     pluginInstalled: pluginInstalled(root),
+    pluginAutoUpdate: pluginAutoUpdate(root),
+    pluginCopy: pluginCopy(root, home),
   };
 }
 
@@ -252,17 +254,59 @@ function mcpServers(root, home) {
   return result;
 }
 
-export const PLUGIN_ID = 'unbranch@unbranch-kit';
+/** The marketplace this repository publishes, as `.claude-plugin/marketplace.json` names it. */
+export const MARKETPLACE_NAME = 'unbranch-kit';
+export const PLUGIN_ID = `unbranch@${MARKETPLACE_NAME}`;
+
+/** A project settings file as an object, or `undefined` when absent or unreadable. */
+function projectSettings(root, file) {
+  try {
+    const settings = JSON.parse(readText(join(root, '.claude', file)));
+    return settings && typeof settings === 'object' ? settings : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 /** Whether the project's settings enable the kit's plugin. */
 function pluginInstalled(root) {
-  for (const file of ['settings.json', 'settings.local.json']) {
-    try {
-      const settings = JSON.parse(readText(join(root, '.claude', file)));
-      if (settings?.enabledPlugins?.[PLUGIN_ID]) return true;
-    } catch {
-      // absent or unreadable: not enabled there
-    }
+  return ['settings.json', 'settings.local.json'].some(
+    (file) => projectSettings(root, file)?.enabledPlugins?.[PLUGIN_ID],
+  );
+}
+
+/**
+ * Whether Claude Code updates the plugin on its own: `autoUpdate` on the
+ * marketplace's entry, the local settings first as Claude Code reads them.
+ * Unset, it is off for a marketplace like this one, so a release reaches no
+ * one who installed an earlier version until they update by hand.
+ */
+function pluginAutoUpdate(root) {
+  for (const file of ['settings.local.json', 'settings.json']) {
+    const value = projectSettings(root, file)?.extraKnownMarketplaces?.[MARKETPLACE_NAME]?.autoUpdate;
+    if (typeof value === 'boolean') return value;
   }
-  return false;
+  return undefined;
+}
+
+/**
+ * The copy of the plugin Claude Code loads here, from its own record
+ * (`~/.claude/plugins/installed_plugins.json`): this project's install first,
+ * then the user's. Only the version and the scope.
+ */
+function pluginCopy(root, home) {
+  if (!home) return undefined;
+  let installs;
+  try {
+    const record = JSON.parse(readText(join(home, '.claude', 'plugins', 'installed_plugins.json')));
+    installs = record?.plugins?.[PLUGIN_ID];
+  } catch {
+    return undefined;
+  }
+  if (!Array.isArray(installs)) return undefined;
+  const install =
+    installs.find((i) => typeof i?.projectPath === 'string' && samePath(i.projectPath, root)) ??
+    installs.find((i) => i?.scope === 'user');
+  if (typeof install?.version !== 'string') return undefined;
+  return { version: install.version, scope: install.scope ?? 'project' };
 }

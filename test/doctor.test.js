@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { cli, guardRepoRoot, tempDir, write } from './helpers.js';
@@ -303,6 +303,88 @@ test('doctor shows the skills installed when the project enables the plugin', as
   assert.equal(code, 0);
   assert.ok(passed.includes('✓ the unbranch skills are installed for this project'));
   assert.equal(notes.some((n) => /skills are not installed/.test(n)), false);
+});
+
+const { version: VERSION } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+
+/** A project with the plugin enabled, and `autoUpdate` on its marketplace when given. */
+function withSkills(dir, autoUpdate) {
+  setUp(dir);
+  write(dir, '.claude/settings.json', {
+    extraKnownMarketplaces: {
+      'unbranch-kit': {
+        source: { source: 'github', repo: 'TYU-Zeng/unbranch-kit' },
+        ...(autoUpdate === undefined ? {} : { autoUpdate }),
+      },
+    },
+    enabledPlugins: { 'unbranch@unbranch-kit': true },
+  });
+}
+
+/** Claude Code's record of where it installed the plugin, in `home`. */
+const installed = (home, ...installs) =>
+  write(home, '.claude/plugins/installed_plugins.json', { version: 2, plugins: { 'unbranch@unbranch-kit': installs } });
+
+test('doctor passes when the skills update on their own', async (t) => {
+  const dir = tempDir(t);
+  withSkills(dir, true);
+  const { code, passed, notes } = await doctor(t, dir);
+  assert.equal(code, 0);
+  assert.ok(passed.includes('✓ the unbranch skills update on their own'));
+  assert.equal(notes.some((n) => /update/.test(n)), false);
+});
+
+test('doctor notes skills that do not update on their own, and how to fix it', async (t) => {
+  const unset = tempDir(t);
+  withSkills(unset);
+  const a = await doctor(t, unset);
+  assert.equal(a.code, 0, 'a note, not a failure');
+  assert.ok(a.notes.some((n) => /^! the unbranch skills do not update on their own.*\n {4}→ run: npx @unbranch\/kit@latest init$/.test(n)));
+
+  const off = tempDir(t);
+  withSkills(off, false);
+  const b = await doctor(t, off);
+  assert.equal(b.code, 0);
+  assert.ok(b.notes.some((n) => /^! auto-update is off for the unbranch skills.*\n {4}→ set "autoUpdate": true on "unbranch-kit"/.test(n)));
+});
+
+test('doctor notes a copy of the skills older than this kit, with the update command', async (t) => {
+  const dir = tempDir(t);
+  const home = tempDir(t);
+  withSkills(dir, true);
+  installed(
+    home,
+    { scope: 'project', projectPath: tempDir(t), version: VERSION },
+    { scope: 'project', projectPath: dir, version: '0.0.1' },
+  );
+  const { code, notes } = await doctor(t, dir, { home });
+  assert.equal(code, 0);
+  assert.ok(
+    notes.includes(`! the unbranch skills here are 0.0.1; ${VERSION} is out\n    → claude plugin update unbranch@unbranch-kit --scope project`),
+    notes.join('\n'),
+  );
+});
+
+test('doctor says nothing about a copy as new as the kit, or newer, or not recorded', async (t) => {
+  for (const installs of [[{ scope: 'user', version: VERSION }], [{ scope: 'user', version: '99.0.0' }], []]) {
+    const dir = tempDir(t);
+    const home = tempDir(t);
+    withSkills(dir, true);
+    installed(home, ...installs);
+    const { notes } = await doctor(t, dir, { home });
+    assert.equal(notes.some((n) => /is out/.test(n)), false, JSON.stringify(installs));
+  }
+});
+
+test('doctor compares versions part by part', async (t) => {
+  const dir = tempDir(t);
+  const home = tempDir(t);
+  withSkills(dir, true);
+  // A minor version ten higher sorts before this one as text ("0.13" < "0.3").
+  const [major, minor] = VERSION.split('.').map(Number);
+  installed(home, { scope: 'user', version: `${major}.${minor + 10}.0` });
+  const { notes } = await doctor(t, dir, { home });
+  assert.equal(notes.some((n) => /is out/.test(n)), false);
 });
 
 test('doctor checks that docs.features exists', async (t) => {

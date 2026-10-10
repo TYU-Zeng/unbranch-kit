@@ -80,6 +80,13 @@ test('--version and -v print the package version and exit 0', async (t) => {
   }
 });
 
+// Claude Code updates an installed plugin only when this version changes, and
+// release-please bumps it with package.json (extra-files in its config).
+test('the Claude Code plugin carries the package version', () => {
+  const plugin = JSON.parse(readFileSync(new URL('../.claude-plugin/plugin.json', import.meta.url), 'utf8'));
+  assert.equal(plugin.version, version);
+});
+
 test('--help and -h print usage, naming --skills and --no-skills, and exit 0', async (t) => {
   for (const flag of ['--help', '-h']) {
     const { code, out } = await cli(t, [flag]);

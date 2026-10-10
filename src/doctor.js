@@ -7,8 +7,9 @@ import {
   mcpUrl,
   projectRoot,
   readJson,
+  VERSION,
 } from './config.js';
-import { survey } from './survey.js';
+import { MARKETPLACE_NAME, PLUGIN_ID, survey } from './survey.js';
 
 /**
  * `unbranch doctor`: says whether this repository is set up, one line per
@@ -108,8 +109,30 @@ export async function doctor({ cwd, home, fetch, log }) {
   );
 
   // What the kit added beside the connection.
-  if (found.pluginInstalled) check(true, 'the unbranch skills are installed for this project');
-  else note('the unbranch skills are not installed', 'npx @unbranch/kit init --skills');
+  if (found.pluginInstalled) {
+    check(true, 'the unbranch skills are installed for this project');
+    // A release reaches an installed copy only through an update; Claude Code
+    // runs it on its own only where auto-update is on.
+    if (found.pluginAutoUpdate === true) check(true, 'the unbranch skills update on their own');
+    else if (found.pluginAutoUpdate === false) {
+      note(
+        'auto-update is off for the unbranch skills: a release reaches you only when you update',
+        `set "autoUpdate": true on "${MARKETPLACE_NAME}" in .claude/settings.json`,
+      );
+    } else {
+      note(
+        'the unbranch skills do not update on their own: a release reaches you only when you update',
+        'run: npx @unbranch/kit@latest init',
+      );
+    }
+    const copy = found.pluginCopy;
+    if (copy && older(copy.version, VERSION)) {
+      note(
+        `the unbranch skills here are ${copy.version}; ${VERSION} is out`,
+        `claude plugin update ${PLUGIN_ID} --scope ${copy.scope}`,
+      );
+    }
+  } else note('the unbranch skills are not installed', 'npx @unbranch/kit init --skills');
   const features = binding?.docs?.features;
   if (typeof features === 'string') {
     check(
@@ -121,4 +144,14 @@ export async function doctor({ cwd, home, fetch, log }) {
 
   log(results.every(Boolean) ? `All set: ${join(root, BINDING_FILE)}` : 'Not set up yet — see above.');
   return results.every(Boolean) ? 0 : 1;
+}
+
+/** Whether version `a` comes before `b`, part by part: 0.2.0 before 0.10.0. */
+function older(a, b) {
+  const parts = (v) => v.split(/[.+-]/).slice(0, 3).map((p) => Number.parseInt(p, 10) || 0);
+  const [x, y] = [parts(a), parts(b)];
+  for (let i = 0; i < 3; i += 1) {
+    if ((x[i] ?? 0) !== (y[i] ?? 0)) return (x[i] ?? 0) < (y[i] ?? 0);
+  }
+  return false;
 }
