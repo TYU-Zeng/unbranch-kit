@@ -23,6 +23,8 @@ test('survey of an empty repository and home finds nothing', (t) => {
     claudeMd: { exists: false, hasBlock: false },
     mcp: { local: undefined, user: undefined, others: [] },
     pluginInstalled: false,
+    pluginAutoUpdate: undefined,
+    pluginCopy: undefined,
   });
 });
 
@@ -331,6 +333,46 @@ test('survey does not count the plugin enabled only in the home settings', (t) =
   const home = tempDir(t);
   write(home, '.claude/settings.json', { enabledPlugins: { 'unbranch@unbranch-kit': true } });
   assert.equal(survey(root, home).pluginInstalled, false);
+});
+
+const marketplace = (autoUpdate) => ({
+  extraKnownMarketplaces: { 'unbranch-kit': { source: { source: 'github', repo: 'TYU-Zeng/unbranch-kit' }, autoUpdate } },
+});
+
+test('survey reads autoUpdate on the marketplace, the local settings first', (t) => {
+  const root = tempDir(t);
+  write(root, '.claude/settings.json', marketplace(true));
+  assert.equal(survey(root, tempDir(t)).pluginAutoUpdate, true);
+  write(root, '.claude/settings.local.json', marketplace(false));
+  assert.equal(survey(root, tempDir(t)).pluginAutoUpdate, false);
+});
+
+test('survey leaves autoUpdate unset when no settings give it a boolean', (t) => {
+  for (const content of [{}, marketplace('yes'), { extraKnownMarketplaces: { other: { autoUpdate: true } } }, '{ not json']) {
+    const root = tempDir(t);
+    write(root, '.claude/settings.json', content);
+    assert.equal(survey(root, tempDir(t)).pluginAutoUpdate, undefined, JSON.stringify(content));
+  }
+});
+
+test("survey takes this project's copy of the plugin from Claude Code's record, then the user's", (t) => {
+  const root = tempDir(t);
+  const home = tempDir(t);
+  const record = (...installs) =>
+    write(home, '.claude/plugins/installed_plugins.json', { version: 2, plugins: { 'unbranch@unbranch-kit': installs } });
+
+  record({ scope: 'project', projectPath: tempDir(t), version: '0.1.0' }, { scope: 'user', version: '0.2.0' });
+  assert.deepEqual(survey(root, home).pluginCopy, { version: '0.2.0', scope: 'user' });
+
+  record({ scope: 'user', version: '0.2.0' }, { scope: 'local', projectPath: projectKey(root), version: '0.3.0' });
+  assert.deepEqual(survey(root, home).pluginCopy, { version: '0.3.0', scope: 'local' });
+
+  record({ scope: 'project', projectPath: tempDir(t), version: '0.1.0' });
+  assert.equal(survey(root, home).pluginCopy, undefined, "another project's copy is not this one's");
+
+  write(home, '.claude/plugins/installed_plugins.json', '{ not json');
+  assert.equal(survey(root, home).pluginCopy, undefined);
+  assert.equal(survey(root, undefined).pluginCopy, undefined);
 });
 
 // ---------------------------------------------------------------- this round's additions

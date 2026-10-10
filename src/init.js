@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { isAbsolute, join } from 'node:path';
 import {
   BINDING_FILE,
@@ -15,6 +15,7 @@ import {
   BLOCK_END,
   BLOCK_START,
   CLAUDE_MD,
+  MARKETPLACE_NAME,
   PLUGIN_ID,
   survey,
 } from './survey.js';
@@ -34,8 +35,9 @@ export const MARKETPLACE = 'TYU-Zeng/unbranch-kit';
  * `.unbranch.json` (the binding: project, server, docs map, autoProgress),
  * `.mcp.json` (the server, project-scoped; Claude Code signs in through
  * unbranch on first use), and, with the skills, `.claude/settings.json`
- * (written by Claude Code's own plugin command) and a marked block in
- * CLAUDE.md. Both JSON files are read and checked before anything is written.
+ * (written by Claude Code's own plugin command, with auto-update turned on)
+ * and a marked block in CLAUDE.md. Both JSON files are read and checked
+ * before anything is written.
  */
 export async function init({ cwd, home, options, prompt, log, run }) {
   const root = projectRoot(cwd);
@@ -140,6 +142,7 @@ export async function init({ cwd, home, options, prompt, log, run }) {
     skills = installPlugin(run, root, log);
     failed = !skills;
   }
+  if (skills && found.pluginAutoUpdate === undefined) turnOnAutoUpdate(root, log);
   if (skills && prompt) {
     const note = await yesNo(
       found.claudeMd.exists
@@ -243,6 +246,39 @@ function installPlugin(run, root, log) {
   }
   log(`Installed the unbranch skills (${PLUGIN_ID}) for this project.`);
   return true;
+}
+
+/**
+ * Auto-update on the marketplace's entry in `.claude/settings.json`. Claude
+ * Code leaves it off for a marketplace like this one, and then a release
+ * reaches no one who installed an earlier version until they update by hand.
+ * Only when nobody has set it: an `autoUpdate` someone wrote, either way,
+ * stays as it is.
+ */
+function turnOnAutoUpdate(root, log) {
+  const file = join('.claude', 'settings.json');
+  let settings;
+  try {
+    settings = readJson(root, file) ?? {};
+  } catch (error) {
+    log(`! ${error.message}; the unbranch skills will not update on their own.`);
+    return;
+  }
+  mkdirSync(join(root, '.claude'), { recursive: true });
+  const marketplaces = isObject(settings.extraKnownMarketplaces) ? settings.extraKnownMarketplaces : {};
+  const entry = isObject(marketplaces[MARKETPLACE_NAME]) ? marketplaces[MARKETPLACE_NAME] : {};
+  writeJson(root, file, {
+    ...settings,
+    extraKnownMarketplaces: {
+      ...marketplaces,
+      [MARKETPLACE_NAME]: {
+        source: { source: 'github', repo: MARKETPLACE },
+        ...entry,
+        autoUpdate: true,
+      },
+    },
+  });
+  log(`Turned on auto-update for the unbranch skills in ${join(root, file)}, so each release reaches everyone here.`);
 }
 
 /**

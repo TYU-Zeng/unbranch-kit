@@ -667,6 +667,73 @@ test('init carries on when the marketplace or plugin is already there', async (t
   assert.doesNotMatch(out, /failed/);
 });
 
+// ---------------------------------------------------------------- auto-update
+
+const MARKETPLACE_ENTRY = { source: { source: 'github', repo: 'TYU-Zeng/unbranch-kit' }, autoUpdate: true };
+
+test('init --skills turns on auto-update for the marketplace in .claude/settings.json', async (t) => {
+  const dir = tempDir(t);
+  const { code, out } = await init(t, dir, ['--yes', '--skills']);
+  assert.equal(code, 0);
+  assert.deepEqual(read(dir, '.claude/settings.json'), {
+    extraKnownMarketplaces: { 'unbranch-kit': MARKETPLACE_ENTRY },
+  });
+  assert.match(out, /Turned on auto-update for the unbranch skills/);
+});
+
+test('init turns on auto-update where the skills were installed before, keeping the rest', async (t) => {
+  const dir = tempDir(t);
+  write(dir, '.claude/settings.json', {
+    permissions: { allow: ['Bash(npm test)'] },
+    extraKnownMarketplaces: {
+      other: { source: { source: 'github', repo: 'someone/else' } },
+      'unbranch-kit': { source: { source: 'github', repo: 'TYU-Zeng/unbranch-kit' } },
+    },
+    enabledPlugins: { 'unbranch@unbranch-kit': true },
+  });
+  const { code, runs } = await init(t, dir, ['--yes']);
+  assert.equal(code, 0);
+  assert.equal(runs.length, 0, 'nothing installed again');
+  assert.deepEqual(read(dir, '.claude/settings.json'), {
+    permissions: { allow: ['Bash(npm test)'] },
+    extraKnownMarketplaces: {
+      other: { source: { source: 'github', repo: 'someone/else' } },
+      'unbranch-kit': MARKETPLACE_ENTRY,
+    },
+    enabledPlugins: { 'unbranch@unbranch-kit': true },
+  });
+});
+
+for (const [file, value] of [['settings.json', false], ['settings.json', true], ['settings.local.json', false]]) {
+  test(`init leaves autoUpdate: ${value} in .claude/${file} as it is`, async (t) => {
+    const dir = tempDir(t);
+    const settings = {
+      extraKnownMarketplaces: { 'unbranch-kit': { source: { source: 'github', repo: 'TYU-Zeng/unbranch-kit' }, autoUpdate: value } },
+      enabledPlugins: { 'unbranch@unbranch-kit': true },
+    };
+    write(dir, `.claude/${file}`, settings);
+    const { out } = await init(t, dir, ['--yes']);
+    assert.deepEqual(read(dir, `.claude/${file}`), settings);
+    assert.equal(existsSync(join(dir, '.claude', file === 'settings.json' ? 'settings.local.json' : 'settings.json')), false);
+    assert.doesNotMatch(out, /Turned on auto-update/);
+  });
+}
+
+test('init touches no settings when the skills are not installed', async (t) => {
+  const dir = tempDir(t);
+  await init(t, dir, ['--yes']);
+  assert.equal(existsSync(join(dir, '.claude')), false);
+});
+
+test('init says so and leaves .claude/settings.json alone when it is not JSON', async (t) => {
+  const dir = tempDir(t);
+  write(dir, '.claude/settings.json', '{ not json');
+  const { code, out } = await init(t, dir, ['--yes', '--skills']);
+  assert.equal(code, 0);
+  assert.equal(readText(dir, '.claude/settings.json'), '{ not json');
+  assert.match(out, /settings\.json is not valid JSON .*; the unbranch skills will not update on their own\./);
+});
+
 for (const [label, answer] of [
   ['ENOENT', { error: Object.assign(new Error('spawnSync claude ENOENT'), { code: 'ENOENT' }), status: null }],
   ['exit status 127', { status: 127, stdout: '', stderr: 'sh: 1: claude: not found' }],
